@@ -1,8 +1,7 @@
-use axum_core::{
-    body::Body,
-    response::{IntoResponse, Response},
-};
-use http::{header, StatusCode};
+use axum_core::{body::Body, response::IntoResponse};
+use http::StatusCode;
+
+use crate::{headers::HeaderType, response_from_header};
 
 #[derive(Default, Debug, Clone)]
 pub struct ApacheNotFoundResponse {
@@ -11,7 +10,8 @@ pub struct ApacheNotFoundResponse {
 
 impl ApacheNotFoundResponse {
     #[inline]
-    pub fn with_path(path: String) -> Self {
+    #[must_use]
+    pub const fn with_path(path: String) -> Self {
         Self { path: Some(path) }
     }
 }
@@ -26,9 +26,8 @@ impl IntoResponse for ApacheNotFoundResponse {
         ))
         .replace("{{ url }}", &path);
 
-        Response::builder()
+        response_from_header(&HeaderType::Php)
             .status(StatusCode::NOT_FOUND)
-            .header(header::CONTENT_TYPE, "text/html")
             .body(Body::from(body))
             .unwrap()
     }
@@ -41,7 +40,8 @@ pub struct ApacheForbiddenResponse {
 
 impl ApacheForbiddenResponse {
     #[inline]
-    pub fn with_path(path: String) -> Self {
+    #[must_use]
+    pub const fn with_path(path: String) -> Self {
         Self { path: Some(path) }
     }
 }
@@ -56,10 +56,59 @@ impl IntoResponse for ApacheForbiddenResponse {
         ))
         .replace("{{ url }}", &path);
 
-        Response::builder()
+        response_from_header(&HeaderType::Php)
             .status(StatusCode::FORBIDDEN)
-            .header(header::CONTENT_TYPE, "text/html")
             .body(Body::from(body))
             .unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use axum::response::IntoResponse;
+    use http::{header, HeaderValue};
+    use http_body_util::BodyExt;
+
+    use crate::apache_responses::ApacheNotFoundResponse;
+
+    #[tokio::test]
+    async fn test_apache_not_found_response() {
+        let response = ApacheNotFoundResponse::with_path(String::from("/test"));
+        let response = response.into_response();
+
+        assert_eq!(
+            response.headers().get(header::CONTENT_TYPE),
+            Some(&HeaderValue::from_static("text/html"))
+        );
+
+        let body = String::from_utf8(
+            response
+                .into_body()
+                .collect()
+                .await
+                .unwrap()
+                .to_bytes()
+                .into(),
+        )
+        .unwrap();
+
+        let our_body = r#"<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+        <html>
+            <head>
+                <title>404 Not Found</title>
+            </head>
+            <body>
+                <h1>Not Found</h1>
+                <p>The requested URL /test was not found on this server.</p>
+                <hr />
+                <address>Apache/1.3.20 Server at localhost Port 80</address>
+            </body>
+        </html>"#;
+
+        // dumb formatting
+        assert_eq!(
+            body.replace("\n", "").replace(" ", ""),
+            our_body.replace("\n", "").replace(" ", "")
+        );
     }
 }
