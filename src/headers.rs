@@ -95,12 +95,9 @@ where
 mod tests {
     use std::{future::Future, pin::Pin};
 
-    use self::headers::MasqueradeHeaderLayer;
-
     use super::*;
     use axum::body::Body;
     use axum_core::response::Response;
-    use headers::HeaderType;
     use http::{HeaderValue, Method, Request, Uri};
 
     use tower::{service_fn, Layer, Service};
