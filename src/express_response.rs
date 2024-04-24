@@ -11,8 +11,10 @@ pub struct ExpressNotFoundResponse {
 impl ExpressNotFoundResponse {
     #[inline]
     #[must_use]
-    pub const fn with_path(path: String) -> Self {
-        Self { path }
+    pub fn with_path<S: ToString>(path: S) -> Self {
+        Self {
+            path: path.to_string(),
+        }
     }
 }
 
@@ -24,8 +26,8 @@ impl IntoResponse for ExpressNotFoundResponse {
         ))
         .replace("{{ url }}", &self.path);
 
-        response_from_header(&HeaderType::Php)
-            .status(StatusCode::FORBIDDEN)
+        response_from_header(&HeaderType::ExpressNodeJs)
+            .status(StatusCode::NOT_FOUND)
             .body(Body::from(body))
             .unwrap()
     }
@@ -41,7 +43,7 @@ impl IntoResponse for ExpressInteralErrorResponse {
             "/templates/express_500.html"
         ));
 
-        response_from_header(&HeaderType::Php)
+        response_from_header(&HeaderType::ExpressNodeJs)
             .status(StatusCode::INTERNAL_SERVER_ERROR)
             .body(Body::from(body))
             .unwrap()

@@ -93,12 +93,8 @@ dependencies = [
 name = "axum-masquerade"
 version = "0.1.0"
 dependencies = [
- "axum",
  "axum-core",
  "http",
- "http-body-util",
- "hyper",
- "tokio",
  "tower",
 ]
 

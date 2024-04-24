@@ -20,6 +20,7 @@ const EXPRESS_NODEJS_HEADERS: &[(&str, &str)] = &[
     ("x-content-type-options", "nosniff"),
 ];
 
+#[derive(Clone)]
 pub struct MasqueradeHeaderLayer {
     headers: &'static [(&'static str, &'static str)],
 }
@@ -59,6 +60,7 @@ impl<S> Layer<S> for MasqueradeHeaderLayer {
     }
 }
 
+#[derive(Clone)]
 pub struct HeaderTowerMiddleware<S> {
     headers: &'static [(&'static str, &'static str)],
     inner: S,

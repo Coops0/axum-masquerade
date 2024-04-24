@@ -11,8 +11,10 @@ pub struct ApacheNotFoundResponse {
 impl ApacheNotFoundResponse {
     #[inline]
     #[must_use]
-    pub const fn with_path(path: String) -> Self {
-        Self { path: Some(path) }
+    pub fn with_path<S: ToString>(path: S) -> Self {
+        Self {
+            path: Some(path.to_string()),
+        }
     }
 }
 
@@ -41,8 +43,10 @@ pub struct ApacheForbiddenResponse {
 impl ApacheForbiddenResponse {
     #[inline]
     #[must_use]
-    pub const fn with_path(path: String) -> Self {
-        Self { path: Some(path) }
+    pub fn with_path<S: ToString>(path: S) -> Self {
+        Self {
+            path: Some(path.to_string()),
+        }
     }
 }
 
