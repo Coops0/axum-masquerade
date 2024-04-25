@@ -26,3 +26,9 @@ let app = Router::new()
     .route("/fake", get(handler))
     .layer(MasqueradeHeaderLayer::new(&HeaderType::ExpressNodeJs));
 ```
+
+To add to dependencies:
+Cargo.toml
+```toml
+axum-masquerade = { git = "https://github.com/Coops0/axum-masquerade", version = "0.10.0" }
+```
